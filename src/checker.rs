@@ -59,6 +59,19 @@ impl EcicChecker {
         self.code.len()
     }
 
+    pub fn status(&self) -> CheckStatus {
+        let mut status = CheckStatus::Unknown;
+        for (_, val) in self.checks.dump_checks().iter() {
+            match val {
+                CheckStatus::Unknown => { status = CheckStatus::Unknown },
+                CheckStatus::Nonexistent => return CheckStatus::Nonexistent,
+                CheckStatus::Malformed => return CheckStatus::Malformed,
+                CheckStatus::Good => { status = CheckStatus::Good },
+            }
+        };
+        status
+    }
+
     /// Deserializes the WASM code and executes all checks in the checklist.
     pub fn fire(&mut self) {
         let module = deserialize_buffer::<Module>(&mut self.code).unwrap();
